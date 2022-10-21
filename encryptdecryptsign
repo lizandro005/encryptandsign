@@ -1,0 +1,35 @@
+#Cenário
+#O Joe quer mandar um ficheiro para a Anne, mas quer o encriptar usando chaves assimétricas, primeiramente o joe
+#tem de criar o seu par de chaves, enquanto isso a Anne também começar a crias as suas
+
+# joe
+openssl genrsa -aes128 -out joe_private.pem 1024
+#anne
+openssl genrsa -aes128 -out anne_private.pem 1024
+
+
+# genrsa = The genrsa command generates an RSA private key.
+# -aes128 = Advanced Encryption Standard with 128 bits
+# -out = choose the name of the file
+# 1024 = how many bits
+
+#seguidamente têm de exportar a sua chave pública da sua chave privada
+
+#joe
+openssl rsa -in joe_private.pem -pubout > joe_public.pem
+#anne
+openssl rsa -in anna_private.pem -pubout > anna_public.pem
+
+#após exportar a chave, o Joe encriptou o ficheiro "top_secret.txt", usando a chave pública da anne
+
+openssl rsautl -encrypt -inkey anne_public.pem -pubin -in top_secret.txt -out top_secret.enc
+
+#joe também decidiu assinar a hash do ficheiro
+openssl dgst -sha256 -sign joe_private.pem -out /tmp/sign.sha256 top_secret.enc
+openssl base64 -in /tmp/sign.sha256 -out sign.sha256
+
+#A Anne antes de desencriptar, verificou a assinatura do ficheiro
+openssl dgst -sha256 -verify joe_public.pem -signature /tmp/sign.sha256 top_secret.enc
+
+#Depois da Anne verificar, desencriptou o ficheiro
+openssl rsautl -decrypt -inkey anne_private.pem -in top_secret.enc > top_secret.txt
