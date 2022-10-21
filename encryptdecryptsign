@@ -26,7 +26,6 @@ openssl rsautl -encrypt -inkey anne_public.pem -pubin -in top_secret.txt -out to
 
 #joe também decidiu assinar a hash do ficheiro
 openssl dgst -sha256 -sign joe_private.pem -out /tmp/sign.sha256 top_secret.enc
-openssl base64 -in /tmp/sign.sha256 -out sign.sha256
 
 #A Anne antes de desencriptar, verificou a assinatura do ficheiro
 openssl dgst -sha256 -verify joe_public.pem -signature /tmp/sign.sha256 top_secret.enc
